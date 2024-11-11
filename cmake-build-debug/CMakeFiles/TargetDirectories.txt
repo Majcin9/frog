@@ -1,0 +1,3 @@
+/home/majcin/Sync/projektypp/frogy/cmake-build-debug/CMakeFiles/frogy.dir
+/home/majcin/Sync/projektypp/frogy/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/majcin/Sync/projektypp/frogy/cmake-build-debug/CMakeFiles/rebuild_cache.dir
