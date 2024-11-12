@@ -8,16 +8,26 @@
 
 typedef struct {
 	WINDOW* window;
-	int x, y;
+	int y,x;
 	int rows, cols;
 } WIN;
+typedef struct {
+  int y,x,color;
+  char look;
+  int maxy,maxx;
+}FROG;
 
 typedef struct {
-  int x,y, color, speed;
+  int y,x, color, speed;
   char look;
 }CAR;
 //-------------------------------OKNO-------------------------------------------------
 WIN* initiate_window(){
+  initscr();
+  refresh();
+  nodelay(stdscr,TRUE);
+  noecho();
+  curs_set(FALSE);
   srand(time(NULL));
   WIN* window = (WIN*)malloc(sizeof(WIN));
   if (window== NULL){
@@ -33,7 +43,7 @@ WIN* initiate_window(){
 //--------------------------------AUTA------------------------------------------------
 int set_position(WIN* window){
     int y = (rand()%(window->rows))+1;
-    if (y%2!=1){
+    if (y%2==0){
       if (y == 0)
         y++;
       else
@@ -68,7 +78,46 @@ CAR* initiate_cars(WIN* window){
   position_cars(window, cars);
   return cars;
 }
-void move_cars(WIN* window,CAR* cars){
+//-------------------------------------------------------------------------------------
+FROG* init_frog(WIN* window,CAR* cars){
+  FROG* frog = (FROG*)malloc(sizeof(FROG));
+  if (frog == NULL){
+    free(window);
+    free(cars);
+    exit(1);
+  }
+  frog->x = window->cols/2;
+  frog->maxy = frog->y = window->rows-2;
+  frog->maxx = window->cols-2;
+  frog->look = 'F';
+  
+  return frog;
+}
+
+void move_frog(WIN* window, FROG* frog){
+  int input = getch();
+  if (input!=ERR){
+    if (input == 'a' && frog->x>1){
+      frog->x--;
+    }
+    else if (input == 'd' && frog->x<frog->maxx){
+      frog->x++;
+    }
+    else if (input == 'w' && frog->y>1){
+      frog->y--;
+    }
+    else if (input == 's' && frog->y<frog->maxy){
+      frog->y++;
+    }
+  }
+}
+//-------------------------------------------------------------------------------------
+void free_memory(WIN* window,CAR* cars, FROG* frog){
+  free(cars);
+  free(window);
+  free(frog);
+}
+void move_cars(WIN* window,CAR* cars,FROG* frog){
   while(1){
     wclear(window->window);
     box(window->window,0,0);
@@ -77,6 +126,8 @@ void move_cars(WIN* window,CAR* cars){
       if ((cars[i].x)>=(window->cols-1)){
         cars[i].x=1;
       }
+    move_frog(window,frog);
+    mvwprintw(window->window,frog->y,frog->x,"F");
     mvwprintw(window->window,cars[i].y,cars[i].x,"o");
     (cars[i].x)++;
     }
@@ -84,21 +135,13 @@ void move_cars(WIN* window,CAR* cars){
     usleep(DELAY);
   }
 }
-//-------------------------------------------------------------------------------------
-void free_memory(WIN* window,CAR* cars){
-  free(cars);
-  free(window);
-}
 int main(int argc, char* argv[]){
-  initscr();
   WIN* window = initiate_window();
   CAR* cars = initiate_cars(window);
-  refresh();
-  noecho();
-  curs_set(FALSE);
-  move_cars(window,cars);
+  FROG* frog = init_frog(window,cars);
+  move_cars(window,cars,frog);
   getch();
-  free_memory(window,cars);
+  free_memory(window,cars,frog);
   endwin();
   return 0;
 }
